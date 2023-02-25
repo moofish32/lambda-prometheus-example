@@ -20,6 +20,7 @@ cold_start_counter = meter.create_counter(
     "cold_start_counter",
     description="The number of cold_starts",
 )
+cold_start_counter.add(1, {'env': 'dev'}
 test_counter = meter.create_counter(
     "test_counter",
     description="The number of counts",
