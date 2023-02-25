@@ -1,23 +1,25 @@
-import { App, Duration, Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib'
-import { Construct } from 'constructs'
-import { aws_aps as aps } from 'aws-cdk-lib'
-import { aws_grafana as grafana } from 'aws-cdk-lib';
-import { aws_iam as iam } from 'aws-cdk-lib'
-import { aws_lambda as lambda } from 'aws-cdk-lib'
-import { aws_logs as logs } from 'aws-cdk-lib'
-import * as lambdaPython from '@aws-cdk/aws-lambda-python-alpha'
-import * as path from 'path'
+import * as path from 'path';
+import * as lambdaPython from '@aws-cdk/aws-lambda-python-alpha';
+import {
+  App, Duration, Stack, StackProps, RemovalPolicy,
+  aws_aps as aps,
+  aws_grafana as grafana,
+  aws_iam as iam,
+  aws_lambda as lambda,
+  aws_logs as logs,
+} from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 export class ReproObservabilityStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
-    super(scope, id, props)
+    super(scope, id, props);
 
-    const namingPrefix = 'prometheus-repro'
+    const namingPrefix = 'prometheus-repro';
 
     const logGroup = new logs.LogGroup(this, 'ReproObservabilityLogGroup', {
       logGroupName: `/aws/prometheus/${namingPrefix}-dev`,
       removalPolicy: RemovalPolicy.DESTROY,
-    })
+    });
 
     new aps.CfnWorkspace(this, 'ReproductionPrometheusWorkspace', {
       alias: namingPrefix,
@@ -28,14 +30,14 @@ export class ReproObservabilityStack extends Stack {
         key: 'Name',
         value: namingPrefix,
       }],
-    })
+    });
     const grafanaRole = new iam.Role(this, 'ReproGrafanaRole', {
-      roleName: `prom-repro-grafana-dev`,
+      roleName: 'prom-repro-grafana-dev',
       assumedBy: new iam.ServicePrincipal('grafana.amazonaws.com'),
       managedPolicies: [{
-        managedPolicyArn: 'arn:aws:iam::aws:policy/AmazonPrometheusFullAccess'
+        managedPolicyArn: 'arn:aws:iam::aws:policy/AmazonPrometheusFullAccess',
       }],
-    })
+    });
     new grafana.CfnWorkspace(this, 'ReproGrafanaWorkspace', {
       accountAccessType: 'CURRENT_ACCOUNT',
       authenticationProviders: ['AWS_SSO'],
@@ -46,8 +48,8 @@ export class ReproObservabilityStack extends Stack {
       dataSources: ['PROMETHEUS'],
     });
 
-    const otelLayerArn = "arn:aws:lambda:us-east-2:901920570463:layer:aws-otel-python-amd64-ver-1-15-0:1"
-    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn)
+    const otelLayerArn = 'arn:aws:lambda:us-east-2:901920570463:layer:aws-otel-python-amd64-ver-1-16-0:1';
+    const otelLayer = lambda.LayerVersion.fromLayerVersionArn(this, 'OtelLayer', otelLayerArn);
 
     const reproLambda = new lambdaPython.PythonFunction(this, 'ReproPrometheusLambda', {
       functionName: `${namingPrefix}-dev`,
@@ -69,7 +71,7 @@ export class ReproObservabilityStack extends Stack {
         NAMING_PREFIX: namingPrefix,
       },
       layers: [otelLayer],
-    })
+    });
     reproLambda.role?.addToPrincipalPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       resources: ['*'],
@@ -78,8 +80,8 @@ export class ReproObservabilityStack extends Stack {
         'aps:GetSeries',
         'aps:GetLabels',
         'aps:GetMetricMetadata',
-      ]
-    }))
+      ],
+    }));
 
   }
 }

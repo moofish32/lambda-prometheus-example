@@ -27,7 +27,7 @@ test_counter = meter.create_counter(
 
 def handler(event, context):
     print(context)
-    print('writing metric')
+    print('writing metric 1')
     test_counter.add(1, {'env': 'dev'})
     print('done')
     return

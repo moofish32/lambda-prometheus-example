@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot 1`] = `
+{
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ReproGrafanaRole6DE33D24": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "grafana.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonPrometheusFullAccess",
+        ],
+        "RoleName": "prom-repro-grafana-dev",
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ReproGrafanaWorkspace": {
+      "Properties": {
+        "AccountAccessType": "CURRENT_ACCOUNT",
+        "AuthenticationProviders": [
+          "AWS_SSO",
+        ],
+        "DataSources": [
+          "PROMETHEUS",
+        ],
+        "Description": "Observability example",
+        "Name": "ReproGrafana",
+        "PermissionType": "SERVICE_MANAGED",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "ReproGrafanaRole6DE33D24",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Grafana::Workspace",
+    },
+    "ReproObservabilityLogGroup7846F031": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/prometheus/prometheus-repro-dev",
+        "RetentionInDays": 731,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ReproPrometheusLambda9AF04C0F": {
+      "DependsOn": [
+        "ReproPrometheusLambdaServiceRoleDefaultPolicy932F08A4",
+        "ReproPrometheusLambdaServiceRole0795B74B",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "da722903c3364ee7ef6a9c60827310f72b7a4aa343a4b8c0bb9c73296bdcc820.zip",
+        },
+        "Description": "Validate lambda can write to APS",
+        "Environment": {
+          "Variables": {
+            "AWS_LAMBDA_EXEC_WRAPPER": "/opt/otel-instrument",
+            "ENVIRONMENT": "dev",
+            "NAMING_PREFIX": "prometheus-repro",
+            "OPENTELEMETRY_COLLECTOR_CONFIG_FILE": "/var/task/collector.yaml",
+            "OTEL_METRICS_EXPORTER": "otlp_proto_http",
+          },
+        },
+        "FunctionName": "prometheus-repro-dev",
+        "Handler": "handler.handler",
+        "Layers": [
+          "arn:aws:lambda:us-east-2:901920570463:layer:aws-otel-python-amd64-ver-1-16-0:1",
+        ],
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 150,
+        "Role": {
+          "Fn::GetAtt": [
+            "ReproPrometheusLambdaServiceRole0795B74B",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.9",
+        "Timeout": 60,
+        "TracingConfig": {
+          "Mode": "Active",
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "ReproPrometheusLambdaEventInvokeConfig40F581DC": {
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ReproPrometheusLambda9AF04C0F",
+        },
+        "MaximumRetryAttempts": 0,
+        "Qualifier": "$LATEST",
+      },
+      "Type": "AWS::Lambda::EventInvokeConfig",
+    },
+    "ReproPrometheusLambdaServiceRole0795B74B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ReproPrometheusLambdaServiceRoleDefaultPolicy932F08A4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "aps:RemoteWrite",
+                "aps:GetSeries",
+                "aps:GetLabels",
+                "aps:GetMetricMetadata",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ReproPrometheusLambdaServiceRoleDefaultPolicy932F08A4",
+        "Roles": [
+          {
+            "Ref": "ReproPrometheusLambdaServiceRole0795B74B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ReproductionPrometheusWorkspace": {
+      "Properties": {
+        "Alias": "prometheus-repro",
+        "LoggingConfiguration": {
+          "LogGroupArn": {
+            "Fn::GetAtt": [
+              "ReproObservabilityLogGroup7846F031",
+              "Arn",
+            ],
+          },
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "prometheus-repro",
+          },
+        ],
+      },
+      "Type": "AWS::APS::Workspace",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
