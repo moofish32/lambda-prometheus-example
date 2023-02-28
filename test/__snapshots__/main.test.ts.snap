@@ -40,7 +40,7 @@ exports[`Snapshot 1`] = `
         "DataSources": [
           "PROMETHEUS",
         ],
-        "Description": "Observability example",
+        "Description": "A simple observability example",
         "Name": "ReproGrafana",
         "PermissionType": "SERVICE_MANAGED",
         "RoleArn": {
@@ -71,7 +71,7 @@ exports[`Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "9f25b4c77fe2a750b09b07f4e32c8e83305e5b68878aba0944af15bd163a67c9.zip",
+          "S3Key": "44add6516df7ba693921a561113155e0cc30aec7f256524449e1ee127be279ff.zip",
         },
         "Description": "Validate lambda can write to APS",
         "Environment": {
