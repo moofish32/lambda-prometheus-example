@@ -71,7 +71,7 @@ exports[`Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "da722903c3364ee7ef6a9c60827310f72b7a4aa343a4b8c0bb9c73296bdcc820.zip",
+          "S3Key": "9f25b4c77fe2a750b09b07f4e32c8e83305e5b68878aba0944af15bd163a67c9.zip",
         },
         "Description": "Validate lambda can write to APS",
         "Environment": {

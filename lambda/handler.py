@@ -18,7 +18,7 @@ meter = metrics.get_meter(__name__)
 
 cold_start_counter = meter.create_counter(
     "cold_start_counter",
-    description="The number of cold_starts",
+    description="The number of cold start for the lambda",
 )
 cold_start_counter.add(1, {'env': 'dev'})
 test_counter = meter.create_counter(

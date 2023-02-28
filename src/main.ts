@@ -42,7 +42,7 @@ export class ReproObservabilityStack extends Stack {
       accountAccessType: 'CURRENT_ACCOUNT',
       authenticationProviders: ['AWS_SSO'],
       name: 'ReproGrafana',
-      description: 'Observability example',
+      description: 'A simple observability example',
       permissionType: 'SERVICE_MANAGED',
       roleArn: grafanaRole.roleArn,
       dataSources: ['PROMETHEUS'],
